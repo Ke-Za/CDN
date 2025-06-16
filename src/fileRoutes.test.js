@@ -25,7 +25,7 @@ describe('File Retrieval Route', () => {
     const response = await request(app).get('/files/../secret.txt');
     
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('error', expect.stringContaining('Invalid filename'));
+    expect(response.body).toHaveProperty('error', expect.stringContaining('Path traversal'));
   });
 
   it('should reject empty filename', async () => {
