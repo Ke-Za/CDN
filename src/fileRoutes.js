@@ -4,6 +4,9 @@ const fs = require('fs');
 
 const router = express.Router();
 
+// Base CDN directory to prevent file access outside this directory
+const CDN_DIR = path.join(__dirname, 'cdn');
+
 /**
  * Route handler for retrieving files from CDN directory
  * @param {string} filename - Name of the file to retrieve
@@ -13,14 +16,21 @@ router.get('/files/:filename', (req, res) => {
   const { filename } = req.params;
   
   // Validate filename
-  if (!filename || filename.includes('..')) {
+  if (!filename) {
     return res.status(400).json({ 
-      error: 'Invalid filename. Filename cannot be empty or contain path traversal.' 
+      error: 'Filename cannot be empty.' 
     });
   }
 
-  // Construct full file path
-  const filePath = path.join(__dirname, 'cdn', filename);
+  // Prevent path traversal by resolving and checking the path
+  const filePath = path.resolve(CDN_DIR, filename);
+  
+  // Ensure the resolved path is within the CDN directory
+  if (!filePath.startsWith(CDN_DIR)) {
+    return res.status(400).json({ 
+      error: 'Invalid filename. Path traversal is not allowed.' 
+    });
+  }
 
   // Check if file exists
   if (!fs.existsSync(filePath)) {
