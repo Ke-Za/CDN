@@ -23,14 +23,23 @@ router.get('/files/:filename', (req, res) => {
   }
 
   // Check for path traversal attempts
-  if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+  const normalizedFilename = path.normalize(filename);
+  if (normalizedFilename.includes('..') || path.isAbsolute(normalizedFilename)) {
     return res.status(400).json({ 
       error: 'Invalid filename. Path traversal is not allowed.' 
     });
   }
 
   // Construct full file path
-  const filePath = path.join(CDN_DIR, filename);
+  const filePath = path.join(CDN_DIR, normalizedFilename);
+
+  // Verify the resolved path is within the CDN directory
+  const resolvedPath = path.resolve(filePath);
+  if (!resolvedPath.startsWith(CDN_DIR)) {
+    return res.status(400).json({ 
+      error: 'Invalid filename. Path traversal is not allowed.' 
+    });
+  }
 
   // Check if file exists
   if (!fs.existsSync(filePath)) {
