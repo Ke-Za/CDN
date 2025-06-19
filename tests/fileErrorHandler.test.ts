@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { handleFileRetrieval } from '../src/fileErrorHandler';
 import { join } from 'path';
 import { mkdir, writeFile, unlink } from 'fs/promises';
