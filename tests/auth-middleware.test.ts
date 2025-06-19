@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { authMiddleware } from '../src/middleware/auth-middleware';
 import { Request, Response, NextFunction } from 'express';
+import { ErrorResponse } from '../src/utils/error-response';
 
 describe('Authentication Middleware', () => {
   const mockNext = vi.fn() as NextFunction;
@@ -20,7 +21,9 @@ describe('Authentication Middleware', () => {
     authMiddleware(mockReq, mockRes, mockNext);
 
     expect(mockRes.status).toHaveBeenCalledWith(401);
-    expect(mockRes.json).toHaveBeenCalled();
+    expect(mockRes.json).toHaveBeenCalledWith(
+      new ErrorResponse('Authentication failed', 'No API key provided', 401)
+    );
     expect(mockNext).not.toHaveBeenCalled();
   });
 
@@ -59,7 +62,9 @@ describe('Authentication Middleware', () => {
     authMiddleware(mockReq, mockRes, mockNext);
 
     expect(mockRes.status).toHaveBeenCalledWith(403);
-    expect(mockRes.json).toHaveBeenCalled();
+    expect(mockRes.json).toHaveBeenCalledWith(
+      new ErrorResponse('Authentication failed', 'Invalid API key', 403)
+    );
     expect(mockNext).not.toHaveBeenCalled();
   });
 });
