@@ -1,27 +1,53 @@
-import { describe, it, expect, vi } from 'vitest';
-import fs from 'fs/promises';
-import { checkFileAccess, FileAccessError } from '../src/fileErrorHandler';
+import { describe, it, expect } from 'vitest';
+import { handleFileRetrieval } from '../src/fileErrorHandler';
+import { join } from 'path';
+import { mkdir, writeFile, unlink } from 'fs/promises';
 
-describe('File Error Handling', () => {
-  it('should throw FileAccessError when file cannot be accessed', async () => {
-    // Mock fs.access to simulate permission denied
-    vi.spyOn(fs, 'access').mockRejectedValue(new Error('Permission denied'));
-    
-    await expect(checkFileAccess('/path/to/nonexistent/file')).rejects.toThrow(FileAccessError);
+describe('File Retrieval Error Handling', () => {
+  const testDir = join(process.cwd(), 'test-files');
+
+  beforeEach(async () => {
+    // Ensure test directory exists
+    await mkdir(testDir, { recursive: true });
   });
 
-  it('should successfully check file access when file exists', async () => {
-    // Create mock for successful file access
-    vi.spyOn(fs, 'access').mockResolvedValue(undefined);
-    vi.spyOn(fs, 'stat').mockResolvedValue({} as any);
-
-    await expect(checkFileAccess('/path/to/valid/file')).resolves.not.toThrow();
+  it('should handle non-existent file', async () => {
+    const nonExistentFilePath = join(testDir, 'non-existent-file.txt');
+    
+    const result = await handleFileRetrieval(nonExistentFilePath);
+    
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/File not found/i);
   });
 
-  it('should handle unknown errors during file access', async () => {
-    // Simulate an unknown error
-    vi.spyOn(fs, 'access').mockRejectedValue(new Error());
+  it('should handle file access permission issues', async () => {
+    const testFilePath = join(testDir, 'restricted-file.txt');
     
-    await expect(checkFileAccess('/path/to/file')).rejects.toThrow(FileAccessError);
+    // Create a file
+    await writeFile(testFilePath, 'Test content');
+    
+    try {
+      // Make file unreadable (on Unix-like systems)
+      await unlink(testFilePath);
+    } catch (error) {
+      console.error('Error during test setup:', error);
+    }
+    
+    const result = await handleFileRetrieval(testFilePath);
+    
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Cannot access file/i);
+  });
+
+  it('should successfully retrieve an existing file', async () => {
+    const testFilePath = join(testDir, 'valid-file.txt');
+    const testContent = 'Valid file content';
+    
+    await writeFile(testFilePath, testContent);
+    
+    const result = await handleFileRetrieval(testFilePath);
+    
+    expect(result.success).toBe(true);
+    expect(result.data).toBe(testContent);
   });
 });
