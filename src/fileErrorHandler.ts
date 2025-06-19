@@ -27,14 +27,16 @@ export async function handleFileRetrieval(filePath: string): Promise<FileRetriev
   } catch (error) {
     // Specific error handling
     if (error instanceof Error) {
-      if (error.message.includes('no such file or directory')) {
+      const errorMessage = error.message.toLowerCase();
+
+      if (errorMessage.includes('no such file or directory')) {
         return {
           success: false,
           error: 'File not found: The specified file does not exist.'
         };
       }
 
-      if (error.message.includes('permission denied')) {
+      if (errorMessage.includes('permission denied')) {
         return {
           success: false,
           error: 'Cannot access file: Insufficient permissions.'
