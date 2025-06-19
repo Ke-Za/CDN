@@ -60,7 +60,7 @@ describe('Authentication Middleware', () => {
 
     authMiddleware(mockReq, mockRes, mockNext);
 
-    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith(); // Note: no argument
     expect(mockRes.status).not.toHaveBeenCalled();
   });
 
