@@ -57,6 +57,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     );
   }
 
-  // API key is valid, proceed to the next middleware or route handler
-  return next();
+  // If all checks pass, explicitly call next()
+  next();
 };
