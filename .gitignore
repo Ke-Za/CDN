@@ -4,5 +4,7 @@ dist/
 *.log
 .DS_Store
 coverage/
-.vitest
-.nyc_output
+.nyc_output/
+*.tgz
+.vscode/
+.idea/
