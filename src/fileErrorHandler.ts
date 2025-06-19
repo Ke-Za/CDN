@@ -1,4 +1,4 @@
-import { access, readFile } from 'fs/promises';
+import { access, readFile, stat } from 'fs/promises';
 import { constants } from 'fs';
 
 interface FileRetrievalResult {
@@ -14,6 +14,16 @@ interface FileRetrievalResult {
  */
 export async function handleFileRetrieval(filePath: string): Promise<FileRetrievalResult> {
   try {
+    // Check if the path is a file
+    const pathStat = await stat(filePath);
+    
+    if (pathStat.isDirectory()) {
+      return {
+        success: false,
+        error: 'Cannot access file: Path is a directory.'
+      };
+    }
+
     // Check file accessibility
     await access(filePath, constants.R_OK);
 
