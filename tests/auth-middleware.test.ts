@@ -3,8 +3,21 @@ import { authMiddleware } from '../src/middleware/auth-middleware';
 import { Request, Response, NextFunction } from 'express';
 import { ErrorResponse } from '../src/utils/error-response';
 
+// Mock the ErrorResponse
+vi.mock('../src/utils/error-response', () => ({
+  ErrorResponse: vi.fn().mockImplementation((message, details, status) => ({
+    message,
+    details,
+    statusCode: status
+  }))
+}));
+
 describe('Authentication Middleware', () => {
   const mockNext = vi.fn() as NextFunction;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('should reject requests without an API key', () => {
     const mockReq = {
@@ -22,7 +35,11 @@ describe('Authentication Middleware', () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(401);
     expect(mockRes.json).toHaveBeenCalledWith(
-      new ErrorResponse('Authentication failed', 'No API key provided', 401)
+      expect.objectContaining({
+        message: 'Authentication failed',
+        details: 'No API key provided',
+        statusCode: 401
+      })
     );
     expect(mockNext).not.toHaveBeenCalled();
   });
@@ -63,7 +80,11 @@ describe('Authentication Middleware', () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(403);
     expect(mockRes.json).toHaveBeenCalledWith(
-      new ErrorResponse('Authentication failed', 'Invalid API key', 403)
+      expect.objectContaining({
+        message: 'Authentication failed',
+        details: 'Invalid API key',
+        statusCode: 403
+      })
     );
     expect(mockNext).not.toHaveBeenCalled();
   });
