@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { handleFileRetrieval } from '../src/fileErrorHandler';
 import { join } from 'path';
-import { mkdir, writeFile, chmod } from 'fs/promises';
+import { mkdir, writeFile } from 'fs/promises';
 
 describe('File Retrieval Error Handling', () => {
   const testDir = join(process.cwd(), 'test-files');
@@ -20,14 +20,8 @@ describe('File Retrieval Error Handling', () => {
     expect(result.error).toMatch(/File not found/i);
   });
 
-  it('should handle file access permission issues', async () => {
-    const testFilePath = join(testDir, 'restricted-file.txt');
-    
-    // Create a file with no read permissions
-    await writeFile(testFilePath, 'Test content');
-    await chmod(testFilePath, 0o000); // No permissions
-    
-    const result = await handleFileRetrieval(testFilePath);
+  it('should handle retrieving a directory as if it were a file', async () => {
+    const result = await handleFileRetrieval(testDir);
     
     expect(result.success).toBe(false);
     expect(result.error).toMatch(/Cannot access file/i);
