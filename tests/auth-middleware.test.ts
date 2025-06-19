@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authMiddleware } from '../src/middleware/auth-middleware';
 import { Request, Response, NextFunction } from 'express';
 import { ErrorResponse } from '../src/utils/error-response';
