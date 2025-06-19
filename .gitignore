@@ -4,5 +4,9 @@ dist/
 *.log
 .DS_Store
 coverage/
-.vitest
-.nyc_output
+.vscode/
+.idea/
+.nyc_output/
+.cache/
+.npm/
+.vitest/
